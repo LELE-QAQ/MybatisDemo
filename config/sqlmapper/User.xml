@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<!--namespace：命名空间，用于绑定DAO接口，当你的namespace绑定接口后，你可以不用写接口实现类，mybatis会用过该绑定自动帮你找到对应要执行的SQL语句-->
+
+<mapper namespace="com.mybatis.dao.UserDao">
+
+    <!--parameterType：输入数据类型，这里的指定输入是String类型-->
+    <!--resultType：输出数据类型所映射的java对象类型，这里将查询结果映射成User对象-->
+    <!--#{}：表示一个占位符-->
+    <!--#{id}：id表示接受输入数据，可以用其他参数名替代，如：value等-->
+
+    <select id="findUserById" parameterType="string" resultType="com.mybatis.po.User">
+        select * from user where id = #{id}
+    </select>
+
+    <!--模糊查询-->
+    <!--${value}：表示拼接字符串，将接受的参数直接拼接到sql中，这时参数只能用value-->
+    <!--注意：使用这种方法可能会引起sql注入-->
+    <select id="findUserByName" parameterType="string" resultType="com.mybatis.po.User">
+        select * from user where username like '%${value}%'
+    </select>
+
+    <!--添加数据-->
+    <!--#{}中指定pojo的属性名，接收到pojo对象的属性值，mybatis通过OGNL获取对象的属性值-->
+    <insert id="addUser" parameterType="com.mybatis.po.User">
+
+        /*将插入数据的主键返回，返回到user对象中
+        SELECT LAST_INSERT_ID()：得到刚insert进去记录的主键值，只适用与自增主键
+        keyProperty：将查询到主键值设置到parameterType指定的对象的哪个属性
+        order：SELECT LAST_INSERT_ID()执行顺序，相对于insert语句来说它的执行顺序
+        resultType：指定SELECT LAST_INSERT_ID()的结果类型*/
+
+        <selectKey keyProperty="id" order="AFTER" resultType="java.lang.String">
+            SELECT LAST_INSERT_ID()
+        </selectKey>
+
+        insert into user(username , birthday , sex , address) value (#{username} , #{birthday} , #{sex} , #{address})
+
+    </insert>
+
+    <!--删除数据-->
+    <delete id="delUser" parameterType="string">
+        delete  from user where id = #{id}
+    </delete>
+
+    <!--更新数据-->
+    <update id="updateUser" parameterType="com.mybatis.dao.UserDao">
+        update user set username = #{username} , birthday = #{birthday} ,
+              sex = #{sex} , address = #{address} where id = #{id}
+    </update>
+</mapper>
